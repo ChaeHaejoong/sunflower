@@ -21,27 +21,17 @@ jobs:
           distribution: 'temurin'
           java-version: 17
 
-      - name: Generate Temporary Keystore
-        run: |
-          keytool -genkeypair \
-            -alias temp-alias \
-            -keyalg RSA \
-            -keysize 2048 \
-            -validity 10000 \
-            -keystore app/upload-key.keystore \
-            -storetype PKCS12 \
-            -dname "CN=Temporary, OU=Temporary, O=Temporary, L=Temp, S=Temp, C=US" \
-            -storepass 'temppassword123' \
-            -keypass 'temppassword123'
+      - name: Decode Keystore
+        run: echo "${{ secrets.UPLOAD_KEYSTORE_BASE64 }}" | base64 --decode > app/upload-key.keystore
 
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
       - name: Build AAB
         env:
-          SIGNING_KEY_ALIAS: temp-alias
-          SIGNING_KEY_PASSWORD: temppassword123
-          SIGNING_STORE_PASSWORD: temppassword123
+          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
         run: ./gradlew bundleRelease
 
       - name: Upload AAB

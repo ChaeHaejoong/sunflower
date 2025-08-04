@@ -20,7 +20,7 @@ android {
   compileSdk = libs.versions.compileSdk.get().toInt()
 
   defaultConfig {
-    applicationId = "io.github.sunflower.android"
+    applicationId = "com.sunflower.android.savemyaccount"
     minSdk = libs.versions.minSdk.get().toInt()
     targetSdk = libs.versions.targetSdk.get().toInt()
     testInstrumentationRunner = "com.google.samples.apps.sunflower.utilities.MainTestRunner"

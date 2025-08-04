@@ -1,3 +1,21 @@
+/*
+ * Copyright 2018 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ */
+
+plugins {
+  alias(libs.plugins.android.application)
+  alias(libs.plugins.kotlin.android)
+  alias(libs.plugins.ksp)
+  alias(libs.plugins.hilt)
+  alias(libs.plugins.compose.compiler)
+}
+
 android {
   compileSdk = libs.versions.compileSdk.get().toInt()
 
@@ -18,7 +36,7 @@ android {
     }
   }
 
-  // ← 여기 signingConfigs 추가
+  // ✅ 서명 설정
   signingConfigs {
     create("release") {
       storeFile = file("upload-key.keystore")
@@ -32,8 +50,7 @@ android {
     release {
       isMinifyEnabled = true
       proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
-      
-      // ← 서명 설정 연결
+      // ✅ 릴리스 빌드에 서명 연결
       signingConfig = signingConfigs.getByName("release")
     }
     create("benchmark") {
@@ -46,5 +63,107 @@ android {
       )
     }
   }
-  // ... (나머지 기존 코드 그대로 유지)
+
+  compileOptions {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+  }
+
+  kotlinOptions {
+    jvmTarget = JavaVersion.VERSION_17.toString()
+    freeCompilerArgs += "-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"
+    freeCompilerArgs += "-Xopt-in=kotlinx.coroutines.FlowPreview"
+  }
+
+  buildFeatures {
+    compose = true
+    dataBinding = true
+    buildConfig = true
+  }
+
+  packagingOptions {
+    resources.excludes += "/META-INF/AL2.0"
+    resources.excludes += "/META-INF/LGPL2.1"
+  }
+
+  testOptions {
+    managedDevices {
+      devices {
+        maybeCreate<com.android.build.api.dsl.ManagedVirtualDevice>("pixel2api27").apply {
+          device = "Pixel 2"
+          apiLevel = 27
+          systemImageSource = "aosp"
+        }
+      }
+    }
+  }
+
+  namespace = "com.google.samples.apps.sunflower"
+}
+
+androidComponents {
+  onVariants(selector().withBuildType("release")) {
+    it.packaging.resources.excludes.add("META-INF/*.version")
+  }
+}
+
+dependencies {
+  ksp(libs.androidx.room.compiler)
+  ksp(libs.hilt.android.compiler)
+  implementation(libs.androidx.core.ktx)
+  implementation(libs.androidx.lifecycle.livedata.ktx)
+  implementation(libs.androidx.lifecycle.viewmodel.ktx)
+  implementation(libs.androidx.navigation.compose)
+  implementation(libs.androidx.paging.compose)
+  implementation(libs.androidx.room.ktx)
+  implementation(libs.androidx.work.runtime.ktx)
+  implementation(libs.material)
+  implementation(libs.gson)
+  implementation(libs.okhttp3.logging.interceptor)
+  implementation(libs.retrofit2.converter.gson)
+  implementation(libs.retrofit2)
+  implementation(libs.kotlinx.coroutines.android)
+  implementation(libs.kotlinx.coroutines.core)
+  implementation(libs.hilt.android)
+  implementation(libs.hilt.navigation.compose)
+  implementation(libs.androidx.profileinstaller)
+
+  implementation(platform(libs.androidx.compose.bom))
+  implementation(libs.androidx.activity.compose)
+  implementation(libs.androidx.constraintlayout.compose)
+  implementation(libs.androidx.compose.runtime)
+  implementation(libs.androidx.compose.ui)
+  implementation(libs.androidx.compose.foundation)
+  implementation(libs.androidx.compose.foundation.layout)
+  implementation(libs.androidx.compose.material3)
+  implementation(libs.androidx.compose.ui.viewbinding)
+  implementation(libs.androidx.compose.ui.tooling.preview)
+  implementation(libs.androidx.compose.runtime.livedata)
+  implementation(libs.androidx.lifecycle.viewmodel.compose)
+  implementation(libs.androidx.lifecycle.runtime.compose)
+  implementation(libs.glide)
+  implementation(libs.accompanist.systemuicontroller)
+
+  debugImplementation(libs.androidx.compose.ui.tooling)
+  debugImplementation(libs.androidx.monitor)
+
+  kspAndroidTest(libs.hilt.android.compiler)
+  androidTestImplementation(platform(libs.androidx.compose.bom))
+  androidTestImplementation(libs.androidx.arch.core.testing)
+  androidTestImplementation(libs.androidx.espresso.contrib)
+  androidTestImplementation(libs.androidx.espresso.core)
+  androidTestImplementation(libs.androidx.espresso.intents)
+  androidTestImplementation(libs.androidx.test.ext.junit)
+  androidTestImplementation(libs.androidx.test.uiautomator)
+  androidTestImplementation(libs.androidx.work.testing)
+  androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+  androidTestImplementation(libs.guava)
+  androidTestImplementation(libs.hilt.android.testing)
+  androidTestImplementation(libs.accessibility.test.framework)
+  androidTestImplementation(libs.kotlinx.coroutines.test)
+  testImplementation(libs.junit)
+}
+
+fun getUnsplashAccess(): String? {
+  return project.findProperty("unsplash_access_key") as? String
 }

@@ -36,13 +36,18 @@ android {
     }
   }
 
-  // ✅ 서명 설정
   signingConfigs {
     create("release") {
-      storeFile = file("upload-key.keystore")
-      storePassword = System.getenv("KEYSTORE_PASSWORD")
-      keyAlias = System.getenv("KEY_ALIAS")
-      keyPassword = System.getenv("KEY_PASSWORD")
+      val storeFile = file("upload-key.keystore")
+      val storePassword = System.getenv("SIGNING_STORE_PASSWORD")
+      val keyAlias = System.getenv("SIGNING_KEY_ALIAS")
+      val keyPassword = System.getenv("SIGNING_KEY_PASSWORD")
+      if (storeFile.exists()) {
+        this.storeFile = storeFile
+        this.storePassword = storePassword
+        this.keyAlias = keyAlias
+        this.keyPassword = keyPassword
+      }
     }
   }
 
@@ -50,7 +55,6 @@ android {
     release {
       isMinifyEnabled = true
       proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
-      // ✅ 릴리스 빌드에 서명 연결
       signingConfig = signingConfigs.getByName("release")
     }
     create("benchmark") {

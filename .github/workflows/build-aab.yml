@@ -21,19 +21,17 @@ jobs:
           distribution: 'temurin'
           java-version: 17
 
-      - name: Decode keystore
-        run: echo "${{ secrets.UPLOAD_KEYSTORE }}" | base64 -d > app/upload-key.keystore
-
-      - name: Set env vars for signing
-        run: |
-          echo "KEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}" >> $GITHUB_ENV
-          echo "KEY_ALIAS=${{ secrets.KEY_ALIAS }}" >> $GITHUB_ENV
-          echo "KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}" >> $GITHUB_ENV
+      - name: Decode Keystore
+        run: echo "${{ secrets.UPLOAD_KEYSTORE_BASE64 }}" | base64 --decode > app/upload-key.keystore
 
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
       - name: Build AAB
+        env:
+          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
         run: ./gradlew bundleRelease
 
       - name: Upload AAB

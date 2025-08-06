@@ -20,11 +20,11 @@ android {
   compileSdk = libs.versions.compileSdk.get().toInt()
 
   defaultConfig {
-    applicationId = "com.sunflower.android.savemyaccount"
+    applicationId = "com.sunflower.android.savemyaccount.new"
     minSdk = libs.versions.minSdk.get().toInt()
     targetSdk = libs.versions.targetSdk.get().toInt()
     testInstrumentationRunner = "com.google.samples.apps.sunflower.utilities.MainTestRunner"
-    versionCode = 1
+    versionCode = 2
     versionName = "0.1.6"
     vectorDrawables.useSupportLibrary = true
 

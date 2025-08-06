@@ -107,7 +107,7 @@ android {
 
 androidComponents {
   onVariants(selector().withBuildType("release")) {
-    it.packaging.resources.excludes.add("META-INF/*.version")
+    //    it.packaging.resources.excludes.add("META-INF/*.version")
   }
 }
 
